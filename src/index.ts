@@ -1,21 +1,19 @@
 import 'dotenv/config'
 
 import { serve } from '@hono/node-server';
-import app from './lib/app';
+import { Hono } from 'hono';
+import authRoutes from './routes/auth';
+import userRoutes from './routes/user';
 
-app.get('/', (h) => 
-  h.text("Welcome to hono")
-)
+const PORT = 3000
+const app = new Hono();
 
-app.get('/post', (h) =>
-  h.json({ success: true, message: "Posted" })
-)
+app.route('/api/auth', authRoutes);
+app.route('/api/user', userRoutes);
 
-const PORT = 3000;
 
-console.log('Server running at',PORT)
-
+console.log('Server running at', PORT);
 serve({
   fetch: app.fetch,
-  port: PORT
+  port: PORT,
 })

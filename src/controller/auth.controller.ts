@@ -3,12 +3,13 @@ import { Context } from "hono";
 import prisma from "../lib/prisma";
 import { generateRandomToken } from "../utils/randomToken";
 import { registerType } from "../utils/validation";
+import bcrypt from "bcrypt"
+import { decode, sign, verify } from "hono/jwt";
 
 import { validator } from "hono/validator";
 
 export async function register(c: Context) {
-  //const body: registerType = await c.req.json();
-  const body  = c.req.valid("form") 
+  const body: registerType = await c.req.json();
 
   const { email, password, username } = body;
   const verifyToken = generateRandomToken();
@@ -17,7 +18,7 @@ export async function register(c: Context) {
     const isUser = await prisma.user.findUnique({
       where: {
         email,
-        username
+        username,
       },
     });
     if (isUser) {
@@ -27,10 +28,14 @@ export async function register(c: Context) {
       });
     }
 
+    const saltRounds = 10
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashPassword = await bcrypt.hash(password, salt);
+    
     const newUser = await prisma.user.create({
       data: {
         email,
-        password,
+        password: hashPassword,
         username,
         verifyToken,
       },
@@ -46,4 +51,30 @@ export async function register(c: Context) {
     console.log(err);
     return c.json({ success: false, message: "internal server error" }, 500);
   }
+}
+
+export async function login(c: Context){
+  const body = await c.req.json()
+
+  const { email, password } = body;
+
+  try{
+    const isUser = await prisma.user.findUnique({
+      where: {
+        email
+      }
+    });
+    if (!isUser){
+      return c.json({ success: false, message: 'user with email not found'}, 404);
+    }
+
+    
+
+  }catch(error){
+    if (error instanceof Error){
+      console.log(error);
+      return c.json({ success: false, message: 'internal server error'}, 500);
+    }
+  }
+
 }

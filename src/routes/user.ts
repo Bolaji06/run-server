@@ -1,9 +1,21 @@
-import { Hono } from "hono";
-import { getAllUser, getUser } from "../controller/user.controller";
+import { Hono, Next } from "hono";
+import {
+  deleteUser,
+  editUser,
+  getAllUser,
+  getUser,
+} from "../controller/user.controller";
+import { authMiddleware } from "../middleware/authorization";
 
-const userRoutes = new Hono();
+type JwtVariables = {
+    id: string;
+}
 
-userRoutes.get('/user', getAllUser);
-userRoutes.get('/user/:id', getUser);
+const userRoutes = new Hono<{ Variables: JwtVariables}>();
+
+userRoutes.get("/", getAllUser);
+userRoutes.get("/:id", getUser);
+userRoutes.patch("/:id", authMiddleware, editUser);
+userRoutes.delete("/:id", authMiddleware, deleteUser);
 
 export default userRoutes;

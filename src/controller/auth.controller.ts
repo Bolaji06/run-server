@@ -81,7 +81,7 @@ export async function login(c: Context) {
     const dbPassword = isUser.password;
     const checkPassword = await bcrypt.compare(password, dbPassword);
     if (!checkPassword) {
-      return c.json({ success: false, message: "invalid password" }, 401);
+      return c.json({ success: false, message: "invalid password" }, 400);
     }
 
     const payload = {

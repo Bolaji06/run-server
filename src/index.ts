@@ -5,6 +5,7 @@ import { Hono } from 'hono';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import { cors } from 'hono/cors';
+import workSpaceRoutes from './routes/workspace';
 
 const PORT = 3000
 const app = new Hono();
@@ -22,6 +23,7 @@ app.use("/api/*",
 
 app.route('/api/auth', authRoutes);
 app.route('/api/user', userRoutes);
+app.route('/api/workspace', workSpaceRoutes);
 
 
 console.log('Server running at', PORT);

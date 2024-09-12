@@ -120,5 +120,6 @@ export async function logout(c: Context) {
     if (error instanceof Error) {
       console.log(error);
     }
+    return c.json({ success: false, message: 'internal server error' });
   }
 }

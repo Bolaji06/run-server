@@ -104,7 +104,7 @@ export async function deleteUser(c: Context) {
     return c.json({ success: true, message: "user deleted" }, 200);
   } catch (error) {
     if (error instanceof Error) {
-      return c.json({ success: false, error }, 500);
+      return c.json({ success: false, message: 'internal server error' }, 500);
     }
   }
 }

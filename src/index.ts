@@ -4,9 +4,21 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
+import { cors } from 'hono/cors';
 
 const PORT = 3000
 const app = new Hono();
+
+app.use("/api/*", 
+  cors({
+    origin: ["http://localhost:3000/"],
+    allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
+    allowMethods: ['POST', 'GET', 'PATCH', 'DELETE',  'OPTIONS'],
+    exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+    maxAge: 600,
+    credentials: true,
+  })
+)
 
 app.route('/api/auth', authRoutes);
 app.route('/api/user', userRoutes);

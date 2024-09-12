@@ -21,4 +21,28 @@ model User {
   avatar                String?
   password              String
   verifyToken           String @unique
+  workspace             Workspace[] @relation("UserWorkspace")
+  createdAt             DateTime @default(now())
+}
+
+model Workspace {
+  id                    String @id @default(auto()) @map("_id") @db.ObjectId
+  name                  String @unique
+  createdBy             String @db.ObjectId
+  user                  User   @relation("UserWorkspace", fields: [createdBy], references: [id])
+  sheets                Sheet[] @relation("WorkspaceSheets")
+  isPublic              Boolean @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Sheet {
+  id                    String @id @default(auto()) @map("_id") @db.ObjectId
+  workspaceId           String @db.ObjectId
+  workspace             Workspace @relation("WorkspaceSheets", fields: [workspaceId], references: [id])
+  name                  String?
+  type                  String?
+  contents              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }

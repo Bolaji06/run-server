@@ -39,7 +39,7 @@ export async function getUser(c: Context) {
   }
 }
 
-export async function editUser(c: Context) {
+export async function updateUser(c: Context) {
   const id = c.req.param("id");
   const { username, avatar } = await c.req.json();
   const tokenId = c.get("jwtPayload")?.id

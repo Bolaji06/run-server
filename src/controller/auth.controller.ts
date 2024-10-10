@@ -30,10 +30,12 @@ export async function register(c: Context) {
       },
     });
     if (isUser) {
-      return c.json({
-        success: false,
-        message: "user with email or username already exists",
-      });
+      if (isUser.email === email || isUser.username === username) {
+        return c.json({
+          success: false,
+          message: "user with email or username already exists",
+        });
+      }
     }
 
     const saltRounds = 10;
@@ -86,9 +88,10 @@ export async function login(c: Context) {
 
     const payload = {
       id: isUser.id,
-      username: isUser.email,
+      username: isUser.username,
       email: isUser.email,
       avatar: isUser.avatar,
+      createdAt: isUser.createdAt,
       exp: Math.floor(Date.now() / 1000) + 3600 * 60,
     };
 
@@ -120,5 +123,6 @@ export async function logout(c: Context) {
     if (error instanceof Error) {
       console.log(error);
     }
+    return c.json({ success: false, message: "internal server error" });
   }
 }

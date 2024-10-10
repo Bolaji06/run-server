@@ -1,7 +1,7 @@
 import { Hono, Next } from "hono";
 import {
   deleteUser,
-  editUser,
+  updateUser,
   getAllUser,
   getUser,
 } from "../controller/user.controller";
@@ -15,7 +15,7 @@ const userRoutes = new Hono<{ Variables: JwtVariables}>();
 
 userRoutes.get("/", getAllUser);
 userRoutes.get("/:id", getUser);
-userRoutes.patch("/:id", authMiddleware, editUser);
+userRoutes.patch("/:id", authMiddleware, updateUser);
 userRoutes.delete("/:id", authMiddleware, deleteUser);
 
 export default userRoutes;

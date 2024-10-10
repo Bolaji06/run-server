@@ -39,10 +39,6 @@ model Workspace {
 model Sheet {
   id                    String @id @default(auto()) @map("_id") @db.ObjectId
   workspaceId           String @db.ObjectId
-  workspace             Workspace @relation("WorkspaceSheets", fields: [workspaceId], references: [id])
-  name                  String?
-  type                  String?
-  contents              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  workspace             Workspace @relation("WorkspaceSheets", fields: [workspaceId], references: [id], onDelete: Cascade)
+  contents              String @default("")
 }

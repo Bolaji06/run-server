@@ -39,7 +39,7 @@ export async function getUser(c: Context) {
   }
 }
 
-export async function editUser(c: Context) {
+export async function updateUser(c: Context) {
   const id = c.req.param("id");
   const { username, avatar } = await c.req.json();
   const tokenId = c.get("jwtPayload")?.id
@@ -104,7 +104,7 @@ export async function deleteUser(c: Context) {
     return c.json({ success: true, message: "user deleted" }, 200);
   } catch (error) {
     if (error instanceof Error) {
-      return c.json({ success: false, error }, 500);
+      return c.json({ success: false, message: 'internal server error' }, 500);
     }
   }
 }

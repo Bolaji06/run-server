@@ -78,6 +78,7 @@ export async function createWorkSpace(c: Context) {
   }
 }
 export async function getAllWorkSpace(c: Context) {
+  const { title } = c.req.query();
   const tokenId = c.get("jwtPayload")?.id;
 
   if (!tokenId) {
@@ -99,6 +100,10 @@ export async function getAllWorkSpace(c: Context) {
       where: {
         user: {
           id: user.id,
+        },
+        name: {
+          contains: title,
+          mode: "insensitive",
         },
       },
     });
@@ -154,40 +159,6 @@ export async function getWorkSpace(c: Context) {
   }
 }
 
-export async function searchWorkSpace(c: Context) {
-  const { title } = c.req.query();
-  const tokenId = c.get("jwtPayload")?.id;
-
-  try {
-    if (!title) {
-      const workspace = await prisma.workspace.findMany({
-        where: {
-          user: {
-            id: tokenId,
-          },
-        },
-      });
-      return c.json({ success: true, workspace });
-    }
-
-    const workspace = await prisma.workspace.findUnique({
-      where: {
-        user: {
-          id: tokenId,
-        },
-        name: title,
-      },
-    });
-    if (!workspace) {
-      return c.json({ success: false, workspace });
-    }
-    return c.json({ success: true, workspace });
-  } catch (error) {
-    console.log(error);
-    c.json({ success: false, message: "internal server error" }, 500);
-  }
-}
-
 export async function updateSheets(c: Context) {
   const workspaceId = c.req.param("workspaceId");
   const tokenId = c.get("jwtPayload")?.id;
@@ -221,13 +192,14 @@ export async function updateSheets(c: Context) {
       return c.json({ success: false, message: "workspace is found" }, 404);
     }
 
-
-    const sheetUpdates = workspace.sheets.map((sheet: { id: string, contents: string}, index) => {
-      return {
-        where: { id: sheet.id },
-        data: { contents: sheetContents[index]}
+    const sheetUpdates = workspace.sheets.map(
+      (sheet: { id: string; contents: string }, index) => {
+        return {
+          where: { id: sheet.id },
+          data: { contents: sheetContents[index] },
+        };
       }
-    })
+    );
     const updatedWorkspace = await prisma.workspace.update({
       where: {
         id: workspaceId,
@@ -254,5 +226,76 @@ export async function updateSheets(c: Context) {
       console.log(error);
     }
     return c.json({ success: false, message: "internal server error" }, 500);
+  }
+}
+
+export async function renameWorkspace(c: Context) {
+  const workspaceId = c.req.param("workspaceId");
+  const { title } = await c.req.json();
+  const tokenId = c.get("jwtPayload")?.id;
+
+  if (!tokenId) {
+    return c.json({ success: false, message: "unauthorized" }, 403);
+  }
+
+  try {
+    const workspace = await prisma.workspace.findUnique({
+      where: {
+        id: workspaceId,
+      },
+    });
+
+    if (!workspace) {
+      return c.json({ success: false, message: "not found" }, 404);
+    }
+
+    const newName = await prisma.workspace.update({
+      where: {
+        id: workspace.id,
+      },
+      data: {
+        name: title,
+      },
+    });
+    return c.json({ success: true, message: "ok" }, 200);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(err);
+      return c.json({ success: false, message: "internal server error " });
+    }
+  }
+}
+
+export async function deleteWorkspace(c: Context) {
+  const tokenId = c.get("jwtPayload")?.id;
+  const workspaceId = c.req.param("workspaceId");
+
+  if (!tokenId) {
+    return c.json({ success: false, message: "unauthorized" }, 403);
+  }
+
+  try {
+    const workspace = await prisma.workspace.findUnique({
+      where: {
+        id: workspaceId,
+      },
+    });
+
+    if (!workspace) {
+      return c.json({ success: false, message: "workspace not found" }, 404);
+    }
+
+    const deletedWorkspace = await prisma.workspace.delete({
+      where: {
+        id: workspace.id,
+      },
+    });
+
+    return c.json({ success: false, deletedWorkspace });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log(error);
+      return c.json({ success: false, message: "internal server error" });
+    }
   }
 }
